@@ -118,7 +118,7 @@ pipeline {
         stage('Run Ansible Deployment') {
             steps {
                 script {
-                    withAWS(credentialsId: 'b9b4f570-ae9e-4ba8-890d-216c5d94eca6') {
+                    withCredentials([aws(credentialsId: 'b9b4f570-ae9e-4ba8-890d-216c5d94eca6', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
                         ansiblePlaybook(
                             playbook: 'ansible/deploy.yml',
                             inventory: 'ansible/inventory.ini',
