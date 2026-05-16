@@ -88,6 +88,7 @@ pipeline {
                         script {
                             dir('microservices/dashboard') {
                                 sh '''
+                                    pwd
                                     python3 -m venv venv
                                     . venv/bin/activate
                                     pip install -r ./microservices/dashboard/requirements.txt
