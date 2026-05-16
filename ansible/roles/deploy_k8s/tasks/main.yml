@@ -29,7 +29,7 @@
   shell: |
     kubectl create secret generic app-secrets \
       --from-literal=AWS_ACCESS_KEY_ID="{{ aws_access_key }}" \
-      --from-literal=AWS_SECRET_ACCESS_KEY="{{ aws_secret_key }}" \
+      --from-literal=AWS_SECRET_ACCESS_KEY="{{ aws_secret_access_key }}" \
       --from-literal=RAPIDAPI_KEY="{{ rapidapi_key }}" \
       --from-literal=MLFLOW_TRACKING_URI="{{ mlflow_tracking_uri }}" \
       --from-literal=AWS_RAW_BUCKET="{{ aws_raw_bucket }}" \
