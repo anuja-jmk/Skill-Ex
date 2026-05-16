@@ -71,7 +71,6 @@ def test_too_many_skills_guardrail():
     assert len(at.error) > 0
     assert "Too many skills selected" in at.error[0].value
 
-
 @patch("requests.post")
 def test_resume_matcher_upload_and_parse(mock_post):
     """Test that uploading a PDF resume calls the recommendation endpoint."""
@@ -81,13 +80,14 @@ def test_resume_matcher_upload_and_parse(mock_post):
 
     at = AppTest.from_file("app.py").run()
     
-    # 4. FIX: FileUploader expects (content, file_name) as parameters
-    # We create an in-memory byte stream simulating a small PDF file
+    # FIX: Create a mock file object that explicitly has a 'name' attribute
+    # built directly into it, rather than passing it as a keyword argument.
     import io
     fake_pdf = io.BytesIO(b"fake pdf content")
+    fake_pdf.name = "resume.pdf"  # Streamlit looks for this attribute on the object
     
-    # Pass the content bytes and assign it an explicit name string 
-    at.file_uploader[0].upload(fake_pdf.getvalue(), name="resume.pdf").run()
+    # Pass just the content bytes using positional arguments
+    at.file_uploader[0].upload(fake_pdf.getvalue()).run()
 
     assert not at.exception
     assert "Extracted Skills:" in at.info[0].value
