@@ -27,8 +27,7 @@ MOCK_RECOMMEND_RESPONSE = {
 
 @patch("requests.get")
 def test_market_trends_fetch_success(mock_get):
-    """Test that clicking 'Refresh Trends' successfully loads data into the session state and renders components."""
-    # 1. Setup mocked responses for both trends and momentum API calls
+    """Test that clicking 'Refresh Trends' successfully loads data into the session state."""
     mock_resp_trends = MagicMock(status_code=200)
     mock_resp_trends.json.return_value = MOCK_TREND_DATA
     
@@ -37,58 +36,59 @@ def test_market_trends_fetch_success(mock_get):
     
     mock_get.side_effect = [mock_resp_trends, mock_resp_momentum]
 
-    # 2. Initialize Streamlit App Test
     at = AppTest.from_file("app.py").run()
     
-    # 3. Simulate clicking the "Refresh Trends" button
-    # active_loop simulation finds the button by label
+    # Click 'Refresh Trends' button safely
     at.button[0].click().run()
 
-    # 4. Assertions
     assert not at.exception
     assert "trend_df" in at.session_state
     assert "momentum" in at.session_state
-    # Check if the subheader for Momentum rendered
     assert any("Skill Momentum" in block.value for block in at.subheader)
 
 
 def test_too_many_skills_guardrail():
-    """Test that selecting > 40 skills triggers the safety error message to prevent system crashes."""
+    """Test that selecting > 40 skills triggers the safety error message."""
     at = AppTest.from_file("app.py").run()
     
-    # Manually inject a mock dataframe into session state to bypass the API click
+    # 1. Create a fake dataframe with 45 unique skills (columns)
     fake_skills = {f"Skill_{i}": [1, 2] for i in range(45)}
     df = pd.DataFrame(fake_skills)
     df.index.name = 'posted_at'
     
+    # Inject it directly into the state
     at.session_state.trend_df = df
     at.session_state.momentum = pd.Series({"Skill_1": 1.0})
     at.run()
 
-    # Select all 45 skills in the multiselect widget
-    at.multiselect[0].select_all().run()
+    # 2. FIX: Instead of select_all(), grab all the strings from the mock frame
+    all_skills_list = df.columns.tolist()
 
-    # Check if the system safety error is triggered
+    # 3. FIX: Pass the entire list into the multiselect using .set_value()
+    at.multiselect[0].set_value(all_skills_list).run()
+
+    # Verify the protection triggered
     assert len(at.error) > 0
     assert "Too many skills selected" in at.error[0].value
 
 
 @patch("requests.post")
 def test_resume_matcher_upload_and_parse(mock_post):
-    """Test that uploading a PDF resume calls the recommendation endpoint and updates metrics."""
+    """Test that uploading a PDF resume calls the recommendation endpoint."""
     mock_resp = MagicMock(status_code=200)
     mock_resp.json.return_value = MOCK_RECOMMEND_RESPONSE
     mock_post.return_value = mock_resp
 
     at = AppTest.from_file("app.py").run()
     
-    # Switch to the Resume Matcher Tab (Index 1)
-    # Simulate file uploader receiving a dummy byte stream
-    at.file_uploader[0].upload(b"fake pdf content").run()
+    # 4. FIX: FileUploader expects (content, file_name) as parameters
+    # We create an in-memory byte stream simulating a small PDF file
+    import io
+    fake_pdf = io.BytesIO(b"fake pdf content")
+    
+    # Pass the content bytes and assign it an explicit name string 
+    at.file_uploader[0].upload(fake_pdf.getvalue(), name="resume.pdf").run()
 
-    # Assertions
     assert not at.exception
-    # Check if the extracted skills are visible in an info box
     assert "Extracted Skills:" in at.info[0].value
-    # Check if our metric displays the 85% match calculation (0.85 * 100)
     assert "85%" in at.metric[0].value
