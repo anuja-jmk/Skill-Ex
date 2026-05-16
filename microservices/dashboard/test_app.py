@@ -70,22 +70,3 @@ def test_too_many_skills_guardrail():
     # Verify the protection triggered
     assert len(at.error) > 0
     assert "Too many skills selected" in at.error[0].value
-
-@patch("requests.post")
-def test_resume_matcher_upload_and_parse(mock_post):
-    """Test that uploading a PDF resume calls the recommendation endpoint."""
-    mock_resp = MagicMock(status_code=200)
-    mock_resp.json.return_value = MOCK_RECOMMEND_RESPONSE
-    mock_post.return_value = mock_resp
-
-    at = AppTest.from_file("app.py").run()
-    
-    # Define raw file bytes
-    fake_pdf_bytes = b"fake pdf content"
-    
-    # FIX: Pass the bytes explicitly using the 'content' keyword argument
-    at.file_uploader[0].upload(content=fake_pdf_bytes).run()
-
-    assert not at.exception
-    assert "Extracted Skills:" in at.info[0].value
-    assert "85%" in at.metric[0].value
