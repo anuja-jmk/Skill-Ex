@@ -80,6 +80,33 @@ pipeline {
             }
         }
 
+        stage('Run Unit Tests') {
+            parallel {
+                stage('Test Dashboard') {
+                    when { expression { env.DASHBOARD_CHANGED == 'true' } }
+                    steps {
+                        script {
+                            dir('microservices/dashboard') {
+                                sh '''
+                                    python3 -m venv venv
+                                    . venv/bin/activate
+                                    pip install -r ../requirements.txt
+                                    pip install pytest pytest-mock
+                                    pytest --junitxml=dashboard-results.xml
+                                '''
+                            }
+                        }
+                    }
+                }
+            }
+            post {
+                always {
+                    // Automatically parses your XML files and populates Jenkins test graphs
+                    junit '**/dashboard-results.xml'
+                }
+            }
+        }
+
         stage('Build & Push Ingestion') {
             when { expression { env.INGESTION_CHANGED == 'true' } }
             steps {
