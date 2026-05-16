@@ -80,14 +80,11 @@ def test_resume_matcher_upload_and_parse(mock_post):
 
     at = AppTest.from_file("app.py").run()
     
-    # FIX: Create a mock file object that explicitly has a 'name' attribute
-    # built directly into it, rather than passing it as a keyword argument.
-    import io
-    fake_pdf = io.BytesIO(b"fake pdf content")
-    fake_pdf.name = "resume.pdf"  # Streamlit looks for this attribute on the object
+    # Define raw file bytes
+    fake_pdf_bytes = b"fake pdf content"
     
-    # Pass just the content bytes using positional arguments
-    at.file_uploader[0].upload(fake_pdf.getvalue()).run()
+    # FIX: Pass the bytes explicitly using the 'content' keyword argument
+    at.file_uploader[0].upload(content=fake_pdf_bytes).run()
 
     assert not at.exception
     assert "Extracted Skills:" in at.info[0].value
