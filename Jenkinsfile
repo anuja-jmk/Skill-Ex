@@ -27,7 +27,7 @@ pipeline {
     }
     
     stages {
-        stage('Clean Workspace') {
+        stage('Clean Workspace & Checkout SCM') {
             steps {
                 sh 'git clean -fdx'
                 sh 'git reset --hard HEAD'
@@ -36,32 +36,6 @@ pipeline {
                 checkout scm
             }
         }
-
-        stage('Checkout') {
-            steps {
-                git branch: 'main', url: "${GITHUB_REPO_URL}"
-            }
-        }
-
-        // stage('Generate .env') {
-        //     steps {
-        //         script {
-        //             echo "Generating .env file from Jenkins credentials..."
-        //             withCredentials([aws(credentialsId: 'b9b4f570-ae9e-4ba8-890d-216c5d94eca6', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
-        //                 sh '''
-        //                 echo "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}" > microservices/.env
-        //                 echo "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}" >> microservices/.env
-        //                 echo "RAPIDAPI_KEY=${RAPIDAPI_KEY}" >> microservices/.env
-        //                 echo "AWS_RAW_BUCKET=amzn-s3-raw-bucket-skillex" >> microservices/.env
-        //                 echo "AWS_PROCESSED_BUCKET=amzn-s3-processed-bucket-skillex" >> microservices/.env
-        //                 echo "AWS_MODELS_BUCKET=amzn-s3-models-bucket" >> microservices/.env
-        //                 echo "PYTHONUNBUFFERED=1" >> microservices/.env
-        //                 echo "APP_ENV=production" >> microservices/.env
-        //                 '''
-        //             }
-        //         }
-        //     }
-        // }
 
       stage('Detect Changes') {
             steps {
@@ -74,7 +48,6 @@ pipeline {
                     env.MLFLOW_CHANGED = 'true'
                     env.ELK_CHANGED = 'true'
                     
-                    // Optional: Print to console to verify
                     echo "Flags set: Ingestion=${env.INGESTION_CHANGED}, Dashboard=${env.DASHBOARD_CHANGED}, ML=${env.ML_CHANGED}"
                 }
             }
@@ -99,6 +72,9 @@ pipeline {
                         }
                     }
                 }
+                // stage('Test PII Masker') {
+                //     when { expression { env.}}
+                // }
             }
         }
 
