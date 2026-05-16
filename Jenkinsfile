@@ -90,19 +90,13 @@ pipeline {
                                 sh '''
                                     python3 -m venv venv
                                     . venv/bin/activate
-                                    pip install -r ../requirements.txt
+                                    pip install -r ./requirements.txt
                                     pip install pytest pytest-mock
                                     pytest --junitxml=dashboard-results.xml
                                 '''
                             }
                         }
                     }
-                }
-            }
-            post {
-                always {
-                    // Automatically parses your XML files and populates Jenkins test graphs
-                    junit '**/dashboard-results.xml'
                 }
             }
         }
