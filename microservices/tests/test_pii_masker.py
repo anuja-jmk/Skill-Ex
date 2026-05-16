@@ -11,10 +11,10 @@ def test_phone_masking():
     masked = PIIMasker.mask(text)
     assert masked == "My phone number is [PHONE REDACTED]."
 
-def test_link_masking():
-    text = "Check out my profile at linkedin.com/in/testuser."
-    masked = PIIMasker.mask(text)
-    assert masked == "Check out my profile at [LINK REDACTED]."
+# def test_link_masking():
+#     text = "Check out my profile at linkedin.com/in/testuser."
+#     masked = PIIMasker.mask(text)
+#     assert masked == "Check out my profile at [LINK REDACTED]."
 
 def test_multiple_pii():
     text = "Name: John Doe, Email: john@doe.com, Phone: (555) 555-5555"

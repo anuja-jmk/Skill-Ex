@@ -31,10 +31,10 @@
       --from-literal=AWS_ACCESS_KEY_ID="{{ aws_access_key }}" \
       --from-literal=AWS_SECRET_ACCESS_KEY="{{ aws_secret_key }}" \
       --from-literal=RAPIDAPI_KEY="{{ rapidapi_key }}" \
-      --from-literal=MLFLOW_TRACKING_URI="http://mlflow-service:5000" \
-      --from-literal=AWS_RAW_BUCKET="amzn-s3-raw-bucket-skillex" \
-      --from-literal=AWS_PROCESSED_BUCKET="amzn-s3-processed-bucket-skillex" \
-      --from-literal=AWS_MODELS_BUCKET="amzn-s3-models-bucket" \
+      --from-literal=MLFLOW_TRACKING_URI="{{ mlflow_tracking_uri }}" \
+      --from-literal=AWS_RAW_BUCKET="{{ aws_raw_bucket }}" \
+      --from-literal=AWS_PROCESSED_BUCKET="{{ aws_processed_bucket }}" \
+      --from-literal=AWS_MODELS_BUCKET="{{ aws_models_bucket }}" \
       -n {{ kube_namespace }} --dry-run=client -o yaml | kubectl apply -f -
 
 - name: Remove old model-training deployment if it exists

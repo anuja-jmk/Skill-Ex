@@ -2,7 +2,8 @@
 - name: Deploy Job Trends and Recommendation App
   hosts: local
   become: false
-  vars:
-    kube_namespace: skill-ex-demo 
+  vars_files:
+    - vars/main.yml
+    - vars/vault.yml
   roles:
     - deploy_k8s

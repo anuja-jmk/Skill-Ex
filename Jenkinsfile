@@ -133,17 +133,35 @@ pipeline {
 
         stage('Run Ansible Deployment') {
             steps {
-                script {
-                    withCredentials([aws(credentialsId: 'b9b4f570-ae9e-4ba8-890d-216c5d94eca6', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
-                        ansiblePlaybook(
-                            playbook: 'ansible/deploy.yml',
-                            inventory: 'ansible/inventory.ini',
-                            extraVars: [
-                                aws_access_key: '${AWS_ACCESS_KEY_ID}',
-                                aws_secret_key: '${AWS_SECRET_ACCESS_KEY}',
-                                rapidapi_key:   '${RAPIDAPI_KEY}'
-                            ]
-                        )
+                // script {
+                //     withCredentials([aws(credentialsId: 'b9b4f570-ae9e-4ba8-890d-216c5d94eca6', accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+                //         ansiblePlaybook(
+                //             playbook: 'ansible/deploy.yml',
+                //             inventory: 'ansible/inventory.ini',
+                //             extraVars: [
+                //                 aws_access_key: '${AWS_ACCESS_KEY_ID}',
+                //                 aws_secret_key: '${AWS_SECRET_ACCESS_KEY}',
+                //                 rapidapi_key:   '${RAPIDAPI_KEY}'
+                //             ]
+                //         )
+                //     }
+                // }
+                echo 'Triggering Ansible Playbook with Vault Decryption...'
+        
+                // Pull the vault password securely from Jenkins Credentials
+                withCredentials([string(credentialsId: 'ANSIBLE_VAULT_PASSWORD', variable: 'VAULT_PASS')]) {
+                    script {
+                        // Write the password to a temporary file that Ansible can read
+                        sh 'echo "$VAULT_PASS" > .vault_pass'
+                        
+                        // Run the playbook, passing the vault password file flag
+                        sh '''
+                            ansible-playbook -i ansible/inventory.ini ansible/deploy.yml \
+                            --vault-password-file .vault_pass
+                        '''
+                        
+                        // Clean up the password file immediately so it doesn't linger
+                        sh 'rm -f .vault_pass'
                     }
                 }
             }

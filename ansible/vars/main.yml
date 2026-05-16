@@ -1,0 +1,11 @@
+# Non-sensitive variables
+kube_namespace: "skill-ex-demo"
+mlflow_tracking_uri: "http://mlflow-service:5000"
+aws_raw_bucket: "amzn-s3-raw-bucket-skillex"
+aws_processed_bucket: "amzn-s3-processed-bucket-skillex"
+aws_models_bucket: "amzn-s3-models-bucket"
+
+# Binding unencrypted variable names to the vault values
+aws_access_key: "{{ vault_aws_access_key }}"
+aws_secret_access_key: "{{ vault_aws_secret_access_key }}"
+rapidapi_key: "{{ vault_rapidapi_key }}" 
